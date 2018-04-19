@@ -8,25 +8,40 @@
 void parse_args(int argc, const char **argv);
 int exist_file(char *path);
 
+#define FILE_NAME "Makefile"
+
 int main(int argc, char **argv){
-	if (argc != 2){
-		fprintf(stderr, "usage: cfile [filename]\n");
+	if (argc != 1){
+		fprintf(stderr, "usage: cmake\n");
 		exit(1);
 	}
 	parse_args(argc,argv);
 
-	if (exist_file(argv[1])) {
+	if (exist_file(FILE_NAME)) {
 		fprintf(stderr, "file exsist!!!\n");
 		exit(1);
 	}
 
 	FILE *fp;
-	fp = fopen (argv[1], "a");
-	fprintf(fp, "#include<stdio.h>\n");
-	fprintf(fp, "#include<stdlib.h>\n");
-	fprintf(fp, "#include<string.h>\n\n");
-	fprintf(fp, "int main(int argc, char **argv){\n\n");
-	fprintf(fp, "}\n");
+	fp = fopen (FILE_NAME, "a");
+	fprintf(fp, "CC=gcc\n");
+	fprintf(fp, "vpath %%.c src\n");
+	fprintf(fp, "vpath %%.h include\n\n");
+	fprintf(fp, "OBJS=main.o\n");
+	fprintf(fp, "SRCS=$(OBJS:%%.o=%%.c)\n");
+	fprintf(fp, "CFLAGS=-g -Wall\n");
+	fprintf(fp, "LDLIBS=\n");
+	fprintf(fp, "TARGET=\n");
+	fprintf(fp, "INSTALL_PATH=/home/`whoami`/bin\n");
+	fprintf(fp, "$(TARGET):$(OBJS)\n");
+	fprintf(fp, "\t$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)\n\n");
+	fprintf(fp, ".PHONY: clean install uninstall\n");
+	fprintf(fp, "clean:\n");
+	fprintf(fp, "\t@rm $(OBJS)\n");
+	fprintf(fp, "install:\n");
+	fprintf(fp, "\t@cp $(TARGET) $(INSTALL_PATH)/$(TARGET)\n");
+	fprintf(fp, "uninstall:\n");
+	fprintf(fp, "\t@rm $(INSTALL_PATH)/$(TARGET)\n");
 	fclose(fp);
 
 	return 0;
@@ -42,7 +57,8 @@ void parse_args(int argc, const char **argv){
 	while ((o = getopt_long(argc, (char * const *)argv, "h", s_longopts, NULL)) != EOF){
 		switch (o) {
 			case 'h':
-				fprintf(stdout, "usage: cfile [filename]\n");
+				fprintf(stdout, "usage: $ cmake\n");
+				fprintf(stdout, "you can get Makefile in your curent directry.");
 				break;
 			default:
 				break;
